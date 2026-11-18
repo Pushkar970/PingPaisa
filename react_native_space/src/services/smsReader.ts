@@ -32,13 +32,9 @@ export function isSmsAvailable(): boolean {
 export async function requestSmsPermission(): Promise<boolean> {
   if (Platform.OS !== 'android') return false;
   try {
-    const grants = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.READ_SMS,
-      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
-    ]);
     return (
-      grants[PermissionsAndroid.PERMISSIONS.READ_SMS] === PermissionsAndroid.RESULTS.GRANTED &&
-      grants[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED
+      (await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_SMS)) ===
+      PermissionsAndroid.RESULTS.GRANTED
     );
   } catch {
     return false;

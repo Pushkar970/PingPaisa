@@ -8,10 +8,7 @@ module.exports = function withSmsPermission(config) {
       manifest['uses-permission'] = [];
     }
 
-    const perms = [
-      'android.permission.READ_SMS',
-      'android.permission.RECEIVE_SMS',
-    ];
+    const perms = ['android.permission.READ_SMS'];
 
     perms.forEach((perm) => {
       const exists = manifest['uses-permission'].some(
