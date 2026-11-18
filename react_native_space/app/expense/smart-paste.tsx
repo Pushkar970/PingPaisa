@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(124,58,237,0.1)',
+    backgroundColor: 'rgba(17, 24, 39, 0.06)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   parsedTitle: { color: colors.heading, fontSize: 15, fontWeight: '600' },
   parsedMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: spacing.sm },
   categoryChip: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceVariant,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,

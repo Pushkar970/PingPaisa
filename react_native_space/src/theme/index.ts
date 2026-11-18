@@ -1,24 +1,25 @@
 export const colors = {
-  base: '#F5C518',
-  surface: '#D4A80E',
-  card: '#F7D44C',
-  cardBorder: 'rgba(0,0,0,0.1)',
-  cardGlass: 'rgba(255,255,255,0.7)',
-  primary: '#7C3AED',
-  primaryLight: '#8B5CF6',
-  accent: '#7C3AED',
-  heading: '#1A1A1A',
-  body: '#2D2D2D',
-  muted: '#6B6B6B',
-  error: '#DC2626',
-  success: '#16A34A',
-  warning: '#D97706',
+  base: '#FFD214',              // Option 1: Warm Vibrant Sunflower Gold
+  surface: '#FFFFFF',           // Crisp White for surfaces, modals, popovers
+  surfaceVariant: '#F1F5F9',    // Slate 100 for secondary tags, chips, tracks
+  card: '#FFFFFF',              // Pure Porcelain White Cards
+  cardBorder: 'rgba(15, 23, 42, 0.08)', // Subtle slate border
+  cardGlass: 'rgba(255, 255, 255, 0.95)',
+  primary: '#111827',           // Carbon Obsidian Black (Main CTA, FAB, Active items)
+  primaryLight: '#1F2937',      // Charcoal
+  accent: '#111827',            // Carbon Black Accent
+  heading: '#0F172A',           // Deep Slate Black for titles
+  body: '#334155',              // Slate 700 for high-contrast body text
+  muted: '#64748B',             // Slate 500 for secondary/meta text
+  error: '#DC2626',             // Clear Red for expenses/debts
+  success: '#16A34A',           // Emerald Green for income, positive cashflow
+  warning: '#D97706',           // Burnt Orange/Amber (clearly visible on yellow)
   white: '#FFFFFF',
-  inputBg: '#EDE9FE',
-  inputBorder: '#C4B5FD',
-  gradientPrimary: ['#7C3AED', '#9333EA'] as const,
-  gradientAccent: ['#7C3AED', '#6D28D9'] as const,
-  chartColors: ['#7C3AED', '#9333EA', '#6D28D9', '#16A34A', '#D97706', '#DC2626', '#EC4899', '#14B8A6', '#F97316', '#A855F7'],
+  inputBg: '#FFFFFF',           // Crisp White input backgrounds
+  inputBorder: '#E2E8F0',       // Clean slate-200 input border
+  gradientPrimary: ['#111827', '#1F2937'] as const, // Carbon Black Gradient
+  gradientAccent: ['#0F172A', '#334155'] as const,
+  chartColors: ['#111827', '#16A34A', '#DC2626', '#D97706', '#2563EB', '#7C3AED', '#0891B2', '#EC4899', '#F97316', '#4B5563'],
 };
 
 export const spacing = {

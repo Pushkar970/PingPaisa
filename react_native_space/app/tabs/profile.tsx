@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: spacing.md },
   sectionTitle: { color: colors.heading, fontSize: 18, fontWeight: '600', marginBottom: spacing.md },
   planRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  tierBadge: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full },
+  tierBadge: { backgroundColor: colors.surfaceVariant, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full },
   proBadge: { backgroundColor: colors.primary },
   tierText: { color: colors.heading, fontSize: 13, fontWeight: '600' },
   usageRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
   limitSaveBtnText: { color: colors.white, fontSize: 14, fontWeight: '600' },
   limitBarBg: {
     height: 6,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceVariant,
     borderRadius: 3,
     marginTop: spacing.sm,
     overflow: 'hidden' as const,
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   removeLimitText: { color: colors.muted, fontSize: 13, textDecorationLine: 'underline' as const },
   savingsBarBg: {
     height: 8,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceVariant,
     borderRadius: 4,
     marginTop: spacing.md,
     overflow: 'hidden' as const,
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
     gap: spacing.xs,
     marginTop: spacing.sm,
-    backgroundColor: 'rgba(124,58,237,0.08)',
+    backgroundColor: 'rgba(17,24,39,0.06)',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.cardBorder,
   },
   bankItemSelected: {
-    backgroundColor: 'rgba(124,58,237,0.06)',
+    backgroundColor: 'rgba(17,24,39,0.06)',
     borderRadius: borderRadius.sm,
   },
   bankItemLeft: {

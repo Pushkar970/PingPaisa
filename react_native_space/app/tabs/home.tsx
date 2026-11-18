@@ -88,13 +88,13 @@ export default function HomeScreen() {
       {!hasBankSelected && (
         <Pressable style={styles.bankBanner} onPress={() => router.push('/tabs/profile')}>
           <View style={styles.bankBannerLeft}>
-            <Ionicons name="business-outline" size={22} color={colors.accent} />
+            <Ionicons name="business" size={22} color={colors.primary} />
             <View style={{ flex: 1 }}>
               <Text style={styles.bankBannerTitle}>Select Your Bank</Text>
               <Text style={styles.bankBannerDesc}>Choose your bank to track only its SMS transactions</Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.accent} />
+          <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </Pressable>
       )}
 
@@ -182,7 +182,7 @@ export default function HomeScreen() {
             chartConfig={{
               backgroundGradientFrom: colors.card,
               backgroundGradientTo: colors.card,
-              color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
+              color: (opacity = 1) => `rgba(17, 24, 39, ${opacity})`,
               labelColor: () => colors.muted,
               barPercentage: 0.6,
               decimalPlaces: 0,
@@ -203,7 +203,7 @@ export default function HomeScreen() {
               <Text style={styles.splitValue}>{formatINR(splitData?.subscriptionTotal ?? 0)}</Text>
             </View>
             <View style={styles.splitItem}>
-              <View style={[styles.splitDot, { backgroundColor: colors.accent }]} />
+              <View style={[styles.splitDot, { backgroundColor: '#2563EB' }]} />
               <Text style={styles.splitLabel}>Expenses</Text>
               <Text style={styles.splitValue}>{formatINR(splitData?.expenseTotal ?? 0)}</Text>
             </View>
@@ -224,7 +224,7 @@ export default function HomeScreen() {
       {/* AI Insights */}
       <Card style={styles.chartCard}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="sparkles" size={20} color={colors.accent} />
+          <Ionicons name="sparkles" size={20} color={colors.primary} />
           <Text style={[styles.sectionTitle, { marginBottom: 0, marginLeft: spacing.sm }]}>AI Insights</Text>
           <Pressable style={{ marginLeft: 'auto' }} onPress={() => router.push('/insights')}>
             <Text style={styles.viewAll}>View All</Text>
@@ -232,7 +232,7 @@ export default function HomeScreen() {
         </View>
         {suggestionsData.length > 0 ? suggestionsData.slice(0, 3).map((s) => (
           <View key={s?.id ?? Math.random().toString()} style={styles.suggestionItem}>
-            <Ionicons name={getIconName(s?.icon)} size={20} color={colors.accent} />
+            <Ionicons name={getIconName(s?.icon)} size={20} color={colors.primary} />
             <View style={{ flex: 1, marginLeft: spacing.sm }}>
               <Text style={styles.suggestionTitle}>{s?.title ?? ''}</Text>
               <Text style={styles.suggestionDesc} numberOfLines={2}>{s?.description ?? ''}</Text>
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   splitValue: { color: colors.heading, fontSize: 18, fontWeight: '600' },
   splitBarContainer: { flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden' },
   splitBarLeft: { backgroundColor: colors.primary, borderTopLeftRadius: 6, borderBottomLeftRadius: 6 },
-  splitBarRight: { backgroundColor: colors.accent, borderTopRightRadius: 6, borderBottomRightRadius: 6 },
+  splitBarRight: { backgroundColor: '#2563EB', borderTopRightRadius: 6, borderBottomRightRadius: 6 },
   suggestionItem: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: spacing.sm, borderTopWidth: 1, borderTopColor: colors.cardBorder },
   suggestionTitle: { color: colors.heading, fontSize: 14, fontWeight: '600' },
   suggestionDesc: { color: colors.muted, fontSize: 13, marginTop: 2 },
@@ -319,16 +319,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(124,58,237,0.08)',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.2)',
+    borderColor: colors.cardBorder,
     borderRadius: borderRadius.md,
     marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   bankBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
-  bankBannerTitle: { color: colors.accent, fontSize: 15, fontWeight: '600' },
+  bankBannerTitle: { color: colors.heading, fontSize: 15, fontWeight: '600' },
   bankBannerDesc: { color: colors.muted, fontSize: 12, marginTop: 2 },
 });

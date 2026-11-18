@@ -74,18 +74,20 @@ export default function ExpensesScreen() {
       {/* SMS Auto-Sync bar (Android-only feature, shown on all platforms for discoverability) */}
       <Pressable style={styles.autoSyncBar} onPress={() => router.push('/expense/sms-sync')}>
         <View style={styles.smartPasteLeft}>
-          <Ionicons name="phone-portrait-outline" size={20} color={colors.primary} />
+          <View style={styles.autoSyncIconBox}>
+            <Ionicons name="flash" size={16} color="#FFD214" />
+          </View>
           <View style={{ marginLeft: spacing.sm }}>
             <Text style={styles.autoSyncTitle}>Auto-Sync SMS</Text>
             <Text style={styles.autoSyncDesc}>Auto-detect bank & UPI transactions from SMS</Text>
           </View>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+        <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
       </Pressable>
 
       <Pressable style={styles.smartPasteBar} onPress={() => router.push('/expense/smart-paste')}>
         <View style={styles.smartPasteLeft}>
-          <Ionicons name="scan-outline" size={20} color={colors.accent} />
+          <Ionicons name="scan-outline" size={20} color={colors.primary} />
           <View style={{ marginLeft: spacing.sm }}>
             <Text style={styles.smartPasteTitle}>Smart Paste</Text>
             <Text style={styles.smartPasteDesc}>Paste bank SMS to auto-add expenses</Text>
@@ -163,10 +165,18 @@ const styles = StyleSheet.create({
   title: { color: colors.heading, fontSize: 28, fontWeight: '700' },
   total: { color: colors.primary, fontSize: 18, fontWeight: '700' },
   monthScroll: { marginBottom: spacing.md, maxHeight: 40 },
-  monthPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: borderRadius.full, backgroundColor: colors.surface, marginRight: spacing.sm },
-  monthPillActive: { backgroundColor: colors.primary },
-  monthText: { color: colors.muted, fontSize: 13, fontWeight: '500' },
-  monthTextActive: { color: colors.white },
+  monthPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.card,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  monthPillActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  monthText: { color: colors.body, fontSize: 13, fontWeight: '500' },
+  monthTextActive: { color: colors.white, fontWeight: '600' },
   skeletonList: { paddingTop: spacing.md },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: { color: colors.muted, fontSize: 16, marginTop: spacing.md },
@@ -188,9 +198,9 @@ const styles = StyleSheet.create({
   limitBannerWarn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245,158,11,0.1)',
+    backgroundColor: 'rgba(217,119,6,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(245,158,11,0.3)',
+    borderColor: 'rgba(217,119,6,0.3)',
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 10,
@@ -202,30 +212,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(124,58,237,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.2)',
+    backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     marginBottom: spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  autoSyncTitle: { color: colors.primary, fontSize: 14, fontWeight: '600' },
-  autoSyncDesc: { color: colors.muted, fontSize: 11, marginTop: 1 },
+  autoSyncIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#1F2937',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  autoSyncTitle: { color: colors.white, fontSize: 14, fontWeight: '600' },
+  autoSyncDesc: { color: '#94A3B8', fontSize: 11, marginTop: 1 },
   smartPasteBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(124,58,237,0.06)',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: 'rgba(124,58,237,0.15)',
+    borderColor: colors.cardBorder,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   smartPasteLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  smartPasteTitle: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+  smartPasteTitle: { color: colors.heading, fontSize: 14, fontWeight: '600' },
   smartPasteDesc: { color: colors.muted, fontSize: 11, marginTop: 1 },
   expenseCard: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   expenseContent: { flex: 1 },
@@ -234,15 +260,15 @@ const styles = StyleSheet.create({
   smsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(124,58,237,0.12)',
+    backgroundColor: 'rgba(17, 24, 39, 0.06)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,
     gap: 3,
   },
-  smsBadgeText: { color: colors.accent, fontSize: 9, fontWeight: '600' },
+  smsBadgeText: { color: colors.primary, fontSize: 9, fontWeight: '600' },
   expenseMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: spacing.sm },
-  chip: { backgroundColor: colors.surface, paddingHorizontal: 8, paddingVertical: 2, borderRadius: borderRadius.sm },
+  chip: { backgroundColor: colors.surfaceVariant, paddingHorizontal: 8, paddingVertical: 2, borderRadius: borderRadius.sm },
   chipText: { color: colors.muted, fontSize: 11 },
   expenseDate: { color: colors.muted, fontSize: 12 },
   expenseAmount: { color: colors.heading, fontSize: 16, fontWeight: '700' },

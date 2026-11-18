@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     opacity: 0.6,
   },
-  itemCardSelected: { opacity: 1, borderColor: 'rgba(124,58,237,0.3)', borderWidth: 1 },
+  itemCardSelected: { opacity: 1, borderColor: colors.primary, borderWidth: 1.5 },
   checkbox: {
     width: 22,
     height: 22,
@@ -634,10 +634,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   itemTitle: { color: colors.heading, fontSize: 15, fontWeight: '500', flex: 1, marginRight: 8 },
-  itemAmount: { color: colors.accent, fontSize: 16, fontWeight: '700' },
+  itemAmount: { color: colors.heading, fontSize: 16, fontWeight: '700' },
   itemMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: spacing.sm },
   categoryChip: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceVariant,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,

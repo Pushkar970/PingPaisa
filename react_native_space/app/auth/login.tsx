@@ -120,7 +120,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#999999"
+          placeholderTextColor={colors.muted}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -133,7 +133,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#999999"
+          placeholderTextColor={colors.muted}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
@@ -153,10 +153,10 @@ export default function LoginScreen() {
       </View>
 
       <Pressable style={({ pressed }) => [styles.googleButton, pressed && { transform: [{ scale: 0.97 }] }]} onPress={handleGoogleSSO}>
-        <LinearGradient colors={colors.gradientPrimary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.googleGradient}>
-          <Ionicons name="logo-google" size={20} color={colors.white} />
+        <View style={styles.googleGradient}>
+          <Ionicons name="logo-google" size={20} color="#EA4335" />
           <Text style={styles.googleText}>Sign in with Google</Text>
-        </LinearGradient>
+        </View>
       </Pressable>
 
       {Platform.OS !== 'web' && (
@@ -185,20 +185,31 @@ const styles = StyleSheet.create({
   error: { color: colors.error, fontSize: 14, textAlign: 'center', marginBottom: spacing.md },
   inputContainer: { marginBottom: spacing.md, position: 'relative' },
   input: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(0,0,0,0.1)',
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
-    color: '#FFFFFF',
+    color: colors.heading,
     fontSize: 16,
   },
   eyeButton: { position: 'absolute', right: 12, top: 14 },
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.lg },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.cardBorder },
   dividerText: { color: colors.muted, marginHorizontal: spacing.md, fontSize: 14 },
-  googleButton: { borderRadius: borderRadius.md, overflow: 'hidden' as const },
+  googleButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
+    borderRadius: borderRadius.md,
+    overflow: 'hidden' as const,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
   googleGradient: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
@@ -207,7 +218,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: spacing.sm,
   },
-  googleText: { color: colors.white, fontSize: 16, fontWeight: '600' as const },
+  googleText: { color: colors.heading, fontSize: 16, fontWeight: '600' as const },
   biometricButton: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
   itemAmount: { color: colors.success, fontSize: 16, fontWeight: '700' },
   itemMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: spacing.sm },
   categoryChip: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceVariant,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: borderRadius.sm,
