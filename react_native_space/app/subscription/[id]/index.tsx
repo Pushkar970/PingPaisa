@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   editBtn: { color: colors.primary, fontSize: 16, fontWeight: '600' },
   mainCard: { alignItems: 'center', paddingVertical: spacing.lg, marginBottom: spacing.md },
   name: { color: colors.heading, fontSize: 24, fontWeight: '700' },
-  chip: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full, marginTop: spacing.sm },
+  chip: { backgroundColor: colors.surfaceVariant, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full, marginTop: spacing.sm },
   chipText: { color: colors.muted, fontSize: 13 },
   detailCard: { marginBottom: spacing.md },
   deleteButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderWidth: 1, borderColor: colors.error + '40', borderRadius: borderRadius.md, gap: spacing.sm },

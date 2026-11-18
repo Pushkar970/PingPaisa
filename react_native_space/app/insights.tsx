@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   insightTitle: { color: colors.heading, fontSize: 16, fontWeight: '600' },
   insightDesc: { color: colors.body, fontSize: 14, marginTop: 4, lineHeight: 20 },
   tagRow: { flexDirection: 'row', marginTop: spacing.sm },
-  tag: { backgroundColor: colors.surface, paddingHorizontal: 10, paddingVertical: 3, borderRadius: borderRadius.full },
+  tag: { backgroundColor: colors.surfaceVariant, paddingHorizontal: 10, paddingVertical: 3, borderRadius: borderRadius.full },
   tagText: { color: colors.muted, fontSize: 11 },
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyText: { color: colors.muted, fontSize: 16, marginTop: spacing.md },

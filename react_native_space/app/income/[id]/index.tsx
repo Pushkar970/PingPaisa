@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   name: { color: colors.heading, fontSize: 24, fontWeight: '700' },
   amount: { color: colors.success, fontSize: 32, fontWeight: '700', marginVertical: spacing.sm },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  chip: { backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full },
+  chip: { backgroundColor: colors.surfaceVariant, paddingHorizontal: 12, paddingVertical: 4, borderRadius: borderRadius.full },
   chipText: { color: colors.muted, fontSize: 13 },
   smsBadge: {
     flexDirection: 'row',
