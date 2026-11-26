@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
 import { usePushNotifications } from '@/src/hooks/usePushNotifications';
+import SmsConsentModal from '@/src/components/SmsConsentModal';
 import { colors } from '@/src/theme';
 
 export default function TabsLayout() {
@@ -25,6 +26,7 @@ export default function TabsLayout() {
   if (!isAuthenticated) return <Redirect href="/auth/login" />;
 
   return (
+    <>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -87,6 +89,8 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    <SmsConsentModal />
+    </>
   );
 }
 
