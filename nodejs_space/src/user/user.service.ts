@@ -32,12 +32,13 @@ export class UserService {
     if (!plan) throw new NotFoundException('Plan not found');
 
     // Check and reset monthly counter
-    const periodStart = new Date(plan.currentPeriodStart);
-    const daysSince = (Date.now() - periodStart.getTime()) / (1000 * 60 * 60 * 24);
+    let currentPeriodStart = new Date(plan.currentPeriodStart);
+    const daysSince = (Date.now() - currentPeriodStart.getTime()) / (1000 * 60 * 60 * 24);
     if (daysSince > 30) {
+      currentPeriodStart = new Date();
       await this.prisma.userPlan.update({
         where: { userId },
-        data: { aiQueriesUsed: 0, currentPeriodStart: new Date() },
+        data: { aiQueriesUsed: 0, currentPeriodStart },
       });
       plan.aiQueriesUsed = 0;
     }
@@ -51,19 +52,23 @@ export class UserService {
       aiQueriesLimit: plan.tier === 'PRO' ? -1 : 10,
       subscriptionCount: plan.subscriptionCount,
       subscriptionLimit: plan.tier === 'PRO' ? -1 : 5,
-      currentPeriodStart: plan.currentPeriodStart.toISOString(),
+      currentPeriodStart: currentPeriodStart.toISOString(),
       monthlyLimit,
       monthlySpent,
       limitExceeded: monthlyLimit != null && monthlySpent > monthlyLimit,
     };
   }
 
-  async setMonthlyLimit(userId: string, limit: number | null) {
+  async setMonthlyLimit(userId: string, limit?: number | null) {
+    const existing = await this.prisma.userPlan.findUnique({ where: { userId } });
+    if (!existing) throw new NotFoundException('Plan not found');
+
+    const normalizedLimit = limit ?? null;
     await this.prisma.userPlan.update({
       where: { userId },
-      data: { monthlyLimit: limit },
+      data: { monthlyLimit: normalizedLimit },
     });
-    return { success: true, monthlyLimit: limit };
+    return { success: true, monthlyLimit: normalizedLimit };
   }
 
   async upgrade(userId: string) {

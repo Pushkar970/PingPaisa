@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useUserControllerUpgrade } from '@/src/api/generated/api';
 import GradientButton from '@/src/components/GradientButton';
 import Card from '@/src/components/Card';
 import { colors, spacing, borderRadius } from '@/src/theme';
+import { getErrorMessage } from '@/src/api/customFetch';
 
 const FEATURES = [
   { name: 'Subscriptions', free: '5', pro: 'Unlimited' },
@@ -20,10 +21,15 @@ export default function UpgradeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const mutation = useUserControllerUpgrade();
+  const [error, setError] = useState('');
 
   const handleUpgrade = useCallback(() => {
-    mutation.mutate(undefined, { onSuccess: () => router.back() });
-  }, [mutation]);
+    setError('');
+    mutation.mutate(undefined, {
+      onSuccess: () => router.back(),
+      onError: (e) => setError(getErrorMessage(e, 'Upgrade failed')),
+    });
+  }, [mutation, router]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: insets.top + spacing.md, paddingBottom: spacing.xxl }}>
@@ -67,6 +73,7 @@ export default function UpgradeScreen() {
       </Card>
 
       <View style={{ paddingHorizontal: spacing.lg }}>
+        {error ? <Text style={{ color: colors.error, textAlign: 'center', marginBottom: spacing.sm }}>{error}</Text> : null}
         <GradientButton title="Upgrade to Pro" onPress={handleUpgrade} loading={mutation.isPending} />
       </View>
     </ScrollView>

@@ -112,7 +112,8 @@ export default function ProfileScreen() {
           Alert.alert('Not Available', 'Biometric authentication is not supported on this device.');
           return;
         }
-        const token = await AsyncStorage.getItem('auth_token');
+        const tokenKey = process.env.EXPO_PUBLIC_AUTH_TOKEN_KEY ?? 'auth_token';
+        const token = await AsyncStorage.getItem(tokenKey);
         if (token) {
           await SecureStore.setItemAsync('biometric_token', token);
           setBiometricEnabled(true);
@@ -131,17 +132,19 @@ export default function ProfileScreen() {
     }
     try {
       const baseUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '') ?? '';
-      const token = await AsyncStorage.getItem('auth_token');
+      const tokenKey = process.env.EXPO_PUBLIC_AUTH_TOKEN_KEY ?? 'auth_token';
+      const token = await AsyncStorage.getItem(tokenKey);
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
         const url = `${baseUrl}/api/export/csv?type=all`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Export failed');
         const blob = await res.blob();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'export.csv';
         a.click();
       } else {
-        Alert.alert('Export', 'CSV export will be downloaded.');
+        Alert.alert('Export', 'CSV export is currently supported on web.');
       }
     } catch {
       Alert.alert('Error', 'Failed to export data.');
@@ -508,7 +511,7 @@ export default function ProfileScreen() {
             <View style={styles.usageRow}>
               <Text style={styles.usageLabel}>Actual Savings</Text>
               <Text style={[styles.usageValue, { color: actualSavings >= 0 ? colors.success : colors.error }]}>
-                {actualSavings >= 0 ? '+' : ''}{formatINR(Math.abs(actualSavings))}
+                {actualSavings >= 0 ? '+' : '-'}{formatINR(Math.abs(actualSavings))}
               </Text>
             </View>
 

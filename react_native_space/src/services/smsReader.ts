@@ -73,8 +73,8 @@ const CREDIT_REGEX = /(?:credited|received|refund|cashback|reversed|cr\b)/i;
 
 const OTP_REGEX = /(?:otp|one.?time.?password|verification.?code|cvv|pin|passcode)/i;
 
-// Common Indian bank short-code senders: AD-HDFCBK, VM-SBIINB, JD-ICICIB etc.
-const BANK_SENDER_REGEX = /^[A-Z]{2}-[A-Z]{3,}/i;
+// Common Indian bank short-code / DLT senders: AD-HDFCBK, VM-SBIINB, JD-650012 etc.
+const BANK_SENDER_REGEX = /^[A-Z]{2}-[A-Z0-9]{3,}/i;
 
 // UPI / NEFT / IMPS / RTGS keywords
 const PAYMENT_MODE_REGEX = /\b(?:UPI|NEFT|IMPS|RTGS|POS|ATM|EMI|SI|Auto.?Debit)\b/i;
@@ -108,12 +108,9 @@ export function isCreditSms(body: string, address: string): boolean {
   // Must have an amount
   if (!AMOUNT_REGEX.test(body)) return false;
 
-  // Must have a credit keyword
+  // Must have a credit keyword and NOT also a debit (some SMS mention both)
   const isCredit = CREDIT_REGEX.test(body);
-  const isBankSender = BANK_SENDER_REGEX.test(address);
-
-  // Must be credit and NOT also a debit (some SMS mention both)
-  return isCredit && !DEBIT_REGEX.test(body) && (isBankSender || isCredit);
+  return isCredit && !DEBIT_REGEX.test(body);
 }
 
 /** Read SMS inbox from the last N days, filtered to bank transactions */
@@ -129,7 +126,7 @@ export async function readTransactionSms(days: number = 30): Promise<FilteredSms
   return new Promise((resolve) => {
     try {
       SmsAndroid.list(
-        JSON.stringify({ box: 'inbox', minDate }),
+        JSON.stringify({ box: 'inbox', minDate, maxCount: 500 }),
         () => resolve([]),
         (_count: number, smsList: string) => {
           try {
@@ -175,7 +172,7 @@ export async function readCreditSms(days: number = 30): Promise<FilteredSms[]> {
   return new Promise((resolve) => {
     try {
       SmsAndroid.list(
-        JSON.stringify({ box: 'inbox', minDate }),
+        JSON.stringify({ box: 'inbox', minDate, maxCount: 500 }),
         () => resolve([]),
         (_count: number, smsList: string) => {
           try {
@@ -289,7 +286,7 @@ export async function detectBankFromInbox(days: number = 90): Promise<DetectedBa
   return new Promise((resolve) => {
     try {
       SmsAndroid.list(
-        JSON.stringify({ box: 'inbox', minDate }),
+        JSON.stringify({ box: 'inbox', minDate, maxCount: 500 }),
         () => resolve([]),
         (_count: number, smsList: string) => {
           try {

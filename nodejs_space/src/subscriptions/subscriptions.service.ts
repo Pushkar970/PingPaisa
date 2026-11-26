@@ -56,29 +56,32 @@ export class SubscriptionsService {
   }
 
   async create(userId: string, data: any) {
-    const plan = await this.prisma.userPlan.findUnique({ where: { userId } });
-    if (plan && plan.tier === 'FREE' && plan.subscriptionCount >= 5) {
-      throw new ForbiddenException('Free tier limited to 5 subscriptions. Upgrade to Pro.');
-    }
-    const sub = await this.prisma.subscription.create({
-      data: {
-        userId,
-        name: data.name,
-        category: data.category,
-        amount: data.amount,
-        currency: data.currency ?? 'USD',
-        billingCycle: data.billingCycle,
-        nextRenewalDate: new Date(data.nextRenewalDate),
-        reminderDaysBefore: data.reminderDaysBefore ?? [],
-        notes: data.notes ?? null,
-      },
-    });
-    if (plan) {
-      await this.prisma.userPlan.update({
-        where: { userId },
-        data: { subscriptionCount: { increment: 1 } },
+    const sub = await this.prisma.$transaction(async (tx) => {
+      const plan = await tx.userPlan.findUnique({ where: { userId } });
+      if (plan && plan.tier === 'FREE' && plan.subscriptionCount >= 5) {
+        throw new ForbiddenException('Free tier limited to 5 subscriptions. Upgrade to Pro.');
+      }
+      const created = await tx.subscription.create({
+        data: {
+          userId,
+          name: data.name,
+          category: data.category,
+          amount: data.amount,
+          currency: data.currency ?? 'INR',
+          billingCycle: data.billingCycle,
+          nextRenewalDate: new Date(data.nextRenewalDate),
+          reminderDaysBefore: data.reminderDaysBefore ?? [],
+          notes: data.notes ?? null,
+        },
       });
-    }
+      if (plan) {
+        await tx.userPlan.update({
+          where: { userId },
+          data: { subscriptionCount: { increment: 1 } },
+        });
+      }
+      return created;
+    });
     return toSubResponse(sub);
   }
 
@@ -102,12 +105,17 @@ export class SubscriptionsService {
   }
 
   async remove(userId: string, id: string) {
-    const existing = await this.prisma.subscription.findFirst({ where: { id, userId } });
-    if (!existing) throw new NotFoundException('Subscription not found');
-    await this.prisma.subscription.delete({ where: { id } });
-    await this.prisma.userPlan.update({
-      where: { userId },
-      data: { subscriptionCount: { decrement: 1 } },
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.subscription.findFirst({ where: { id, userId } });
+      if (!existing) throw new NotFoundException('Subscription not found');
+      await tx.subscription.delete({ where: { id } });
+      const plan = await tx.userPlan.findUnique({ where: { userId } });
+      if (plan) {
+        await tx.userPlan.update({
+          where: { userId },
+          data: { subscriptionCount: Math.max(0, plan.subscriptionCount - 1) },
+        });
+      }
     });
     return { success: true };
   }

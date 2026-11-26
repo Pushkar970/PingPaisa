@@ -76,7 +76,7 @@ export default function ChatScreen() {
             <Text style={styles.emptyTitle}>Ask me anything about your finances</Text>
             <View style={styles.promptsRow}>
               {SUGGESTED_PROMPTS.map((p) => (
-                <Pressable key={p} style={styles.promptChip} onPress={() => sendMessage(p)}>
+                <Pressable key={p} style={[styles.promptChip, isExhausted && { opacity: 0.5 }]} disabled={isExhausted || chatMutation.isPending} onPress={() => !isExhausted && sendMessage(p)}>
                   <Text style={styles.promptText}>{p}</Text>
                 </Pressable>
               ))}

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, IsDateString, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsDateString, IsIn, IsInt, Min } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsString()
@@ -17,12 +17,15 @@ export class CreateSubscriptionDto {
   currency?: string;
 
   @IsString()
+  @IsIn(['weekly', 'monthly', 'yearly'])
   billingCycle: string;
 
   @IsDateString()
   nextRenewalDate: string;
 
   @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
   @IsOptional()
   reminderDaysBefore?: number[];
 
@@ -41,6 +44,7 @@ export class UpdateSubscriptionDto {
   category?: string;
 
   @IsNumber()
+  @Min(0.01)
   @IsOptional()
   amount?: number;
 
@@ -49,6 +53,7 @@ export class UpdateSubscriptionDto {
   currency?: string;
 
   @IsString()
+  @IsIn(['weekly', 'monthly', 'yearly'])
   @IsOptional()
   billingCycle?: string;
 
@@ -57,6 +62,8 @@ export class UpdateSubscriptionDto {
   nextRenewalDate?: string;
 
   @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
   @IsOptional()
   reminderDaysBefore?: number[];
 

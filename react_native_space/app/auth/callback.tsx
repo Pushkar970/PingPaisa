@@ -1,46 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text, StyleSheet, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { colors, spacing } from '@/src/theme';
 
 export default function CallbackScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ token?: string; error?: string }>();
   const { setTokenAndLoad } = useAuth();
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const redirectToLogin = () => {
+      timer = setTimeout(() => {
+        if (active) router.replace('/auth/login');
+      }, 2000);
+    };
+
     const processCallback = async () => {
       try {
-        let token: string | null = null;
-        let err: string | null = null;
+        let token: string | null = typeof params.token === 'string' ? params.token : null;
+        let err: string | null = typeof params.error === 'string' ? params.error : null;
 
         if (Platform.OS === 'web' && typeof window !== 'undefined') {
-          const params = new URLSearchParams(window.location.search);
-          token = params.get('token');
-          err = params.get('error');
+          const searchParams = new URLSearchParams(window.location.search);
+          token = token ?? searchParams.get('token');
+          err = err ?? searchParams.get('error');
         }
 
         if (err) {
-          setError(err);
-          setTimeout(() => router.replace('/auth/login'), 2000);
+          if (active) setError(err);
+          redirectToLogin();
           return;
         }
 
         if (token) {
           await setTokenAndLoad(token);
-          router.replace('/tabs/home');
+          if (active) router.replace('/tabs/home');
         } else {
-          setError('No authentication token received');
-          setTimeout(() => router.replace('/auth/login'), 2000);
+          if (active) setError('No authentication token received');
+          redirectToLogin();
         }
       } catch {
-        setError('Authentication failed');
-        setTimeout(() => router.replace('/auth/login'), 2000);
+        if (active) setError('Authentication failed');
+        redirectToLogin();
       }
     };
     processCallback();
-  }, []);
+
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [params.token, params.error, router, setTokenAndLoad]);
 
   return (
     <View style={styles.container}>

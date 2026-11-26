@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -55,7 +55,7 @@ export default function SubscriptionsScreen() {
         </Pressable>
       </View>
 
-      {allSubs.isLoading ? (
+      {(activeTab === 'upcoming' ? upcomingSubs.isLoading : allSubs.isLoading) ? (
         <View style={styles.skeletonList}>
           {[1, 2, 3].map((i) => <SkeletonLoader key={i} height={80} style={{ marginBottom: spacing.sm }} />)}
         </View>
@@ -84,10 +84,20 @@ export default function SubscriptionsScreen() {
                     <Text style={styles.subDate}>Next: {new Date(item?.nextRenewalDate ?? '').toLocaleDateString()}</Text>
                   </View>
                 </View>
-                <Text style={styles.subAmount}>{formatINR(item?.amount ?? 0)}/{(item?.billingCycle ?? 'mo').slice(0, 2)}</Text>
+                <Text style={styles.subAmount}>
+                  {formatINR(item?.amount ?? 0)}/
+                  {item?.billingCycle === 'weekly' ? 'wk' : item?.billingCycle === 'yearly' ? 'yr' : 'mo'}
+                </Text>
               </Card>
             </Pressable>
           )}
+          refreshControl={
+            <RefreshControl
+              refreshing={activeTab === 'upcoming' ? upcomingSubs.isRefetching : allSubs.isRefetching}
+              onRefresh={() => (activeTab === 'upcoming' ? upcomingSubs.refetch() : allSubs.refetch())}
+              tintColor={colors.primary}
+            />
+          }
           contentContainerStyle={{ paddingBottom: spacing.xxl }}
         />
       )}

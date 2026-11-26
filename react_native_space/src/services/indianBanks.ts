@@ -26,7 +26,7 @@ export const INDIAN_BANKS: IndianBank[] = [
   { id: 'psb', name: 'Punjab & Sind Bank', senderCodes: ['PSBINB', 'PNSINB'] },
   { id: 'idbi', name: 'IDBI Bank', senderCodes: ['IDBIBK', 'IDBINB'] },
   { id: 'yes', name: 'Yes Bank', senderCodes: ['YESBKK', 'YESBNK'] },
-  { id: 'indusind', name: 'IndusInd Bank', senderCodes: ['IDFCFB', 'INDUSB', 'INDBNK'] },
+  { id: 'indusind', name: 'IndusInd Bank', senderCodes: ['INDUSB', 'INDUSN'] },
   { id: 'federal', name: 'Federal Bank', senderCodes: ['FEDBNK', 'FEDBKK'] },
   { id: 'rbl', name: 'RBL Bank', senderCodes: ['RBLBNK', 'RATBKK'] },
   { id: 'bandhan', name: 'Bandhan Bank', senderCodes: ['BDNBNK', 'BANDHN'] },

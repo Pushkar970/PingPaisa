@@ -1,6 +1,7 @@
 import { Controller, Post, Headers, UnauthorizedException, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PushNotificationService } from './push-notification.service';
 import { InactivityReminderResponseDto } from './dto/notification.dto';
@@ -20,9 +21,11 @@ export class NotificationsController {
   async sendInactivityReminders(
     @Headers('x-api-key') apiKey: string,
   ): Promise<InactivityReminderResponseDto> {
-    // Protect with API key
-    const expectedKey = this.configService.get<string>('CRON_API_KEY');
-    if (!expectedKey || apiKey !== expectedKey) {
+    // Protect with constant-time API key check
+    const expectedKey = this.configService.get<string>('CRON_API_KEY') ?? '';
+    const keyBuf = Buffer.from(apiKey ?? '');
+    const expectedBuf = Buffer.from(expectedKey);
+    if (!expectedKey || keyBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(keyBuf, expectedBuf)) {
       throw new UnauthorizedException('Invalid API key');
     }
 
@@ -45,15 +48,23 @@ export class NotificationsController {
         select: { createdAt: true },
       });
 
-      // Also check subscriptions created recently (user might be active in subscriptions)
-      const latestSub = await this.prisma.subscription.findFirst({
-        where: { userId },
-        orderBy: { updatedAt: 'desc' },
-        select: { updatedAt: true },
-      });
+      // Also check income and subscriptions activity
+      const [latestIncome, latestSub] = await Promise.all([
+        this.prisma.income.findFirst({
+          where: { userId },
+          orderBy: { createdAt: 'desc' },
+          select: { createdAt: true },
+        }),
+        this.prisma.subscription.findFirst({
+          where: { userId },
+          orderBy: { updatedAt: 'desc' },
+          select: { updatedAt: true },
+        }),
+      ]);
 
       const lastActivity = [
         latestExpense?.createdAt,
+        latestIncome?.createdAt,
         latestSub?.updatedAt,
       ]
         .filter(Boolean)

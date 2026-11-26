@@ -53,7 +53,7 @@ export default function InsightsScreen() {
             </Card>
           )}
           contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }}
-          refreshControl={<RefreshControl refreshing={suggestions.isLoading} onRefresh={() => suggestions.refetch()} tintColor={colors.primary} />}
+          refreshControl={<RefreshControl refreshing={suggestions.isRefetching} onRefresh={() => suggestions.refetch()} tintColor={colors.primary} />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Ionicons name="sparkles" size={48} color={colors.muted} />

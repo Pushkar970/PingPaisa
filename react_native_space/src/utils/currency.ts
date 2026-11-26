@@ -8,10 +8,13 @@
  * e.g. 125000 → "1,25,000"   |   1234567.89 → "12,34,567.89"
  */
 export function formatIndianNumber(value: number | string): string {
-  const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+  const strVal = typeof value === 'string' ? value.replace(/,/g, '').trim() : String(value);
+  const num = parseFloat(strVal);
   if (isNaN(num)) return '';
 
-  const [intPart, decPart] = num.toString().split('.');
+  const explicitDec = typeof value === 'string' && strVal.includes('.') ? strVal.split('.')[1] : undefined;
+  const [intPart, numDecPart] = num.toString().split('.');
+  const decPart = explicitDec ?? numDecPart;
   const isNegative = intPart?.startsWith('-');
   const absInt = isNegative ? intPart?.slice(1) ?? '' : intPart ?? '';
 

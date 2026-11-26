@@ -54,10 +54,10 @@ export class AiService {
     ]);
 
     const subText = subs.length > 0
-      ? subs.map((s) => `- ${s.name}: $${toNum(s.amount)}/${s.billingCycle} (${s.category})`).join('\n')
+      ? subs.map((s) => `- ${s.name}: ₹${toNum(s.amount)}/${s.billingCycle} (${s.category})`).join('\n')
       : 'No subscriptions.';
     const expText = recentExpenses.length > 0
-      ? recentExpenses.map((e) => `- ${e.title}: $${toNum(e.amount)} on ${e.date.toISOString().split('T')[0]} (${e.category})`).join('\n')
+      ? recentExpenses.map((e) => `- ${e.title}: ₹${toNum(e.amount)} on ${e.date.toISOString().split('T')[0]} (${e.category})`).join('\n')
       : 'No recent expenses.';
     const totalSubMonthly = subs.reduce((acc, s) => {
       if (s.billingCycle === 'weekly') return acc + toNum(s.amount) * 4.33;
@@ -66,7 +66,7 @@ export class AiService {
     }, 0);
     const totalExpMonth = recentExpenses.reduce((acc, e) => acc + toNum(e.amount), 0);
 
-    return `User's Financial Summary:\n- Monthly subscription cost: $${totalSubMonthly.toFixed(2)}\n- This month's expenses: $${totalExpMonth.toFixed(2)}\n\nActive Subscriptions:\n${subText}\n\nRecent Expenses (this month):\n${expText}`;
+    return `User's Financial Summary:\n- Monthly subscription cost: ₹${totalSubMonthly.toFixed(2)}\n- This month's expenses: ₹${totalExpMonth.toFixed(2)}\n\nActive Subscriptions:\n${subText}\n\nRecent Expenses (this month):\n${expText}`;
   }
 
   async chat(userId: string, message: string, conversationId?: string) {
@@ -108,9 +108,14 @@ export class AiService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({ messages, stream: false }),
+        signal: AbortSignal.timeout(25000),
       });
-      const data = await res.json();
-      aiContent = data?.choices?.[0]?.message?.content ?? aiContent;
+      if (!res.ok) {
+        this.logger.error(`LLM API HTTP ${res.status}`);
+      } else {
+        const data = await res.json();
+        aiContent = data?.choices?.[0]?.message?.content ?? aiContent;
+      }
     } catch (error: any) {
       this.logger.error('LLM API error', error?.message);
     }

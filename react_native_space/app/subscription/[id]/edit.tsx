@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,18 +30,27 @@ export default function EditSubscriptionScreen() {
   const [error, setError] = useState('');
   const [initialized, setInitialized] = useState(false);
 
-  if (data && !initialized) {
-    setName(data?.name ?? '');
-    setCategory(data?.category ?? 'Streaming');
-    setAmount(data?.amount ? formatIndianNumber(data.amount) : '');
-    setCycle(data?.billingCycle ?? 'monthly');
-    setRenewalDate((data?.nextRenewalDate ?? '').split('T')[0]);
-    setNotes(data?.notes ?? '');
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data && !initialized) {
+      setName(data?.name ?? '');
+      setCategory(data?.category ?? 'Streaming');
+      setAmount(data?.amount ? formatIndianNumber(data.amount) : '');
+      setCycle(data?.billingCycle ?? 'monthly');
+      setRenewalDate((data?.nextRenewalDate ?? '').split('T')[0]);
+      setNotes(data?.notes ?? '');
+      setInitialized(true);
+    }
+  }, [data, initialized]);
 
   const handleSave = useCallback(() => {
     if (!name?.trim()) { setError('Name is required'); return; }
+    const parsedAmount = parseAmountInput(amount);
+    if (!parsedAmount || parsedAmount <= 0) { setError('Amount must be greater than 0'); return; }
+    const parsedDate = new Date(renewalDate.trim());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(renewalDate.trim()) || isNaN(parsedDate.getTime())) {
+      setError('Please enter a valid renewal date (YYYY-MM-DD)');
+      return;
+    }
     setError('');
     mutation.mutate(
       {
@@ -49,9 +58,9 @@ export default function EditSubscriptionScreen() {
         data: {
           name: name.trim(),
           category,
-          amount: parseAmountInput(amount),
+          amount: parsedAmount,
           billingCycle: cycle,
-          nextRenewalDate: new Date(renewalDate).toISOString(),
+          nextRenewalDate: parsedDate.toISOString(),
           notes: notes?.trim() || undefined,
         },
       },

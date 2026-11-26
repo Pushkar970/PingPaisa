@@ -215,10 +215,14 @@ export default function IncomeSmsSync() {
     batchMutation.mutate(
       { data: { incomes } },
       {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
           setSavedCount(data?.count ?? incomes.length);
-          const hashes = smsMessages.map((m) => m.hash);
-          markCreditAsProcessed(hashes);
+          const selectedBodies = new Set(selected.map((s) => s?.originalSms).filter(Boolean));
+          const hashes = (selectedBodies.size > 0
+            ? smsMessages.filter((m) => selectedBodies.has(m.body))
+            : smsMessages.filter((_, i) => selectedIndices.has(i))
+          ).map((m) => m.hash);
+          await markCreditAsProcessed(hashes);
           setStep('done');
         },
         onError: (err) => {

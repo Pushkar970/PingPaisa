@@ -51,7 +51,7 @@ export default function SubscriptionDetailScreen() {
 
       <Card style={styles.detailCard}>
         <DetailRow label="Amount" value={formatINR(data?.amount ?? 0)} />
-        <DetailRow label="Currency" value={data?.currency ?? 'USD'} />
+        <DetailRow label="Currency" value={data?.currency ?? 'INR'} />
         <DetailRow label="Billing Cycle" value={data?.billingCycle ?? ''} />
         <DetailRow label="Next Renewal" value={new Date(data?.nextRenewalDate ?? '').toLocaleDateString()} />
         <DetailRow label="Reminders" value={(data?.reminderDaysBefore ?? []).length > 0 ? (data?.reminderDaysBefore ?? []).map((d) => `${d}d before`).join(', ') : 'None'} />

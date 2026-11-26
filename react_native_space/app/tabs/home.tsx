@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, RefreshControl, Pressable, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, RefreshControl, Pressable, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,12 +13,11 @@ import { colors, spacing, borderRadius } from '@/src/theme';
 import { getSelectedBankId } from '@/src/services/indianBanks';
 import { formatINR } from '@/src/utils/currency';
 
-const screenWidth = Dimensions.get('window').width;
-const chartWidth = screenWidth - spacing.lg * 2 - spacing.md * 2;
-
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const chartWidth = screenWidth - spacing.lg * 2 - spacing.md * 2;
   const { user } = useAuth();
 
   const stats = useDashboardControllerGetStats();
@@ -47,7 +46,7 @@ export default function HomeScreen() {
 
   useFocusEffect(useCallback(() => {
     stats.refetch(); breakdown.refetch(); trends.refetch();
-    split.refetch(); upcoming.refetch();
+    split.refetch(); suggestions.refetch(); upcoming.refetch();
   }, []));
 
   const statsData = stats?.data;
@@ -129,7 +128,7 @@ export default function HomeScreen() {
           <Card style={styles.summaryCard}>
             <Text style={styles.summaryLabel}>Net Cash Flow</Text>
             <Text style={[styles.summaryValue, { color: ((statsData?.monthlyIncome ?? 0) - (statsData?.monthlySpend ?? 0)) >= 0 ? colors.success : colors.error }]}>
-              {((statsData?.monthlyIncome ?? 0) - (statsData?.monthlySpend ?? 0)) >= 0 ? '+' : ''}{formatINR(Math.abs((statsData?.monthlyIncome ?? 0) - (statsData?.monthlySpend ?? 0)))}
+              {((statsData?.monthlyIncome ?? 0) - (statsData?.monthlySpend ?? 0)) >= 0 ? '+' : '-'}{formatINR(Math.abs((statsData?.monthlyIncome ?? 0) - (statsData?.monthlySpend ?? 0)))}
             </Text>
           </Card>
         </ScrollView>

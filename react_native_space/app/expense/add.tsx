@@ -28,6 +28,11 @@ export default function AddExpenseScreen() {
     if (!title?.trim()) { setError('Title is required'); return; }
     const parsedAmount = parseAmountInput(amount);
     if (!parsedAmount || parsedAmount <= 0) { setError('Amount must be greater than 0'); return; }
+    const parsedDate = new Date(date.trim());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim()) || isNaN(parsedDate.getTime())) {
+      setError('Please enter a valid date (YYYY-MM-DD)');
+      return;
+    }
     setError('');
     mutation.mutate(
       {
@@ -35,7 +40,7 @@ export default function AddExpenseScreen() {
           title: title.trim(),
           amount: parsedAmount,
           category,
-          date: new Date(date).toISOString(),
+          date: parsedDate.toISOString(),
           notes: notes?.trim() || undefined,
         },
       },

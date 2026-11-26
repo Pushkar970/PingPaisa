@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsDateString, IsArray, Min, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsDateString, IsArray, ArrayMaxSize, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateIncomeDto {
@@ -31,6 +31,7 @@ export class UpdateIncomeDto {
   title?: string;
 
   @IsNumber()
+  @Min(0.01)
   @IsOptional()
   amount?: number;
 
@@ -49,6 +50,7 @@ export class UpdateIncomeDto {
 
 export class ParseCreditSmsDto {
   @IsArray()
+  @ArrayMaxSize(50)
   @IsString({ each: true })
   messages: string[];
 }
@@ -86,6 +88,7 @@ export class ParseCreditSmsResponseDto {
 
 export class BatchCreateIncomeDto {
   @IsArray()
+  @ArrayMaxSize(100)
   @ValidateNested({ each: true })
   @Type(() => CreateIncomeDto)
   incomes: CreateIncomeDto[];

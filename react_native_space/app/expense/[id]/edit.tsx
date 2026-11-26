@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,26 +28,35 @@ export default function EditExpenseScreen() {
   const [error, setError] = useState('');
   const [initialized, setInitialized] = useState(false);
 
-  if (data && !initialized) {
-    setTitle(data?.title ?? '');
-    setAmount(data?.amount ? formatIndianNumber(data.amount) : '');
-    setCategory(data?.category ?? 'Groceries');
-    setDate((data?.date ?? '').split('T')[0]);
-    setNotes(data?.notes ?? '');
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (data && !initialized) {
+      setTitle(data?.title ?? '');
+      setAmount(data?.amount ? formatIndianNumber(data.amount) : '');
+      setCategory(data?.category ?? 'Groceries');
+      setDate((data?.date ?? '').split('T')[0]);
+      setNotes(data?.notes ?? '');
+      setInitialized(true);
+    }
+  }, [data, initialized]);
 
   const handleSave = useCallback(() => {
     if (!title?.trim()) { setError('Title is required'); return; }
+    const parsedAmount = parseAmountInput(amount);
+    if (!parsedAmount || parsedAmount <= 0) { setError('Amount must be greater than 0'); return; }
+    const parsedDate = new Date(date.trim());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim()) || isNaN(parsedDate.getTime())) {
+      setError('Please enter a valid date (YYYY-MM-DD)');
+      return;
+    }
     setError('');
     mutation.mutate(
       {
         id: id as string,
         data: {
           title: title.trim(),
-          amount: parseAmountInput(amount),
+          amount: parsedAmount,
           category,
-          date: new Date(date).toISOString(),
+          date: parsedDate.toISOString(),
           notes: notes?.trim() || undefined,
         },
       },

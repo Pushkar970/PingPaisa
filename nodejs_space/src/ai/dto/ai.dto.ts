@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
 
 export class ChatRequestDto {
   @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
   message: string;
 
   @IsString()

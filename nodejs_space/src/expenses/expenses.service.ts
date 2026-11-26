@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -27,26 +27,31 @@ export class ExpensesService {
   ) {}
 
   async findAll(userId: string, page = 1, limit = 20, month?: string, category?: string) {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.min(100, Math.max(1, Number(limit) || 20));
     const where: any = { userId };
     if (month) {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+        throw new BadRequestException('Invalid month format. Expected YYYY-MM.');
+      }
       const [y, m] = month.split('-').map(Number);
-      const start = new Date(y, m - 1, 1);
-      const end = new Date(y, m, 1);
+      const start = new Date(Date.UTC(y, m - 1, 1));
+      const end = new Date(Date.UTC(y, m, 1));
       where.date = { gte: start, lt: end };
     }
     if (category && category !== 'all') {
       where.category = category;
     }
-    const skip = (page - 1) * limit;
+    const skip = (safePage - 1) * safeLimit;
     const [items, total] = await Promise.all([
-      this.prisma.expense.findMany({ where, skip, take: limit, orderBy: { date: 'desc' } }),
+      this.prisma.expense.findMany({ where, skip, take: safeLimit, orderBy: { date: 'desc' } }),
       this.prisma.expense.count({ where }),
     ]);
     return {
       items: items.map(toExpenseResponse),
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: safePage,
+      totalPages: Math.ceil(total / safeLimit),
     };
   }
 
@@ -143,7 +148,12 @@ ${messages.map((m, i) => `[${i + 1}] ${m}`).join('\n')}`;
           response_format: { type: 'json_object' },
           stream: false,
         }),
+        signal: AbortSignal.timeout(25000),
       });
+      if (!res.ok) {
+        this.logger.error(`SMS parse LLM HTTP ${res.status}`);
+        return { parsed: [], total: messages.length, failed: messages.length };
+      }
       const data = await res.json();
       const content = data?.choices?.[0]?.message?.content;
       if (!content) {
@@ -152,15 +162,19 @@ ${messages.map((m, i) => `[${i + 1}] ${m}`).join('\n')}`;
       const result = JSON.parse(content);
       const transactions = Array.isArray(result?.transactions) ? result.transactions : [];
       const parsed = transactions
-        .filter((t: any) => t?.amount && t?.title)
-        .map((t: any) => ({
-          title: String(t.title ?? 'Unknown'),
-          amount: Number(t.amount),
-          category: String(t.category ?? 'Other'),
-          date: t.date ? new Date(t.date).toISOString() : new Date().toISOString(),
-          notes: t.notes ?? null,
-          originalSms: t.notes ?? '',
-        }));
+        .filter((t: any) => Number(t?.amount) > 0 && t?.title)
+        .map((t: any) => {
+          const parsedDate = t.date ? new Date(t.date) : new Date();
+          const safeDate = isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+          return {
+            title: String(t.title ?? 'Unknown'),
+            amount: Number(t.amount),
+            category: String(t.category ?? 'Other'),
+            date: safeDate.toISOString(),
+            notes: t.notes ?? null,
+            originalSms: t.notes ?? '',
+          };
+        });
       return { parsed, total: messages.length, failed: messages.length - parsed.length };
     } catch (error: any) {
       this.logger.error('SMS parse error', error?.message);

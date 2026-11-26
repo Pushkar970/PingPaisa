@@ -29,6 +29,11 @@ export default function AddSubscriptionScreen() {
     if (!name?.trim()) { setError('Name is required'); return; }
     const parsedAmount = parseAmountInput(amount);
     if (!parsedAmount || parsedAmount <= 0) { setError('Amount must be greater than 0'); return; }
+    const parsedDate = new Date(renewalDate.trim());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(renewalDate.trim()) || isNaN(parsedDate.getTime())) {
+      setError('Please enter a valid renewal date (YYYY-MM-DD)');
+      return;
+    }
     setError('');
     mutation.mutate(
       {
@@ -37,7 +42,7 @@ export default function AddSubscriptionScreen() {
           category,
           amount: parsedAmount,
           billingCycle: cycle,
-          nextRenewalDate: new Date(renewalDate).toISOString(),
+          nextRenewalDate: parsedDate.toISOString(),
           notes: notes?.trim() || undefined,
         },
       },

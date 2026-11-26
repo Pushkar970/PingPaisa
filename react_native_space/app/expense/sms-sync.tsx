@@ -224,9 +224,13 @@ export default function SmsSyncScreen() {
       {
         onSuccess: async (data) => {
           setSavedCount(data?.count ?? expenses.length);
-          // Mark SMS as processed
-          const hashes = smsMessages.map((m) => m.hash);
-          markAsProcessed(hashes);
+          // Mark only selected SMS as processed
+          const selectedBodies = new Set(selected.map((s) => s?.originalSms).filter(Boolean));
+          const hashes = (selectedBodies.size > 0
+            ? smsMessages.filter((m) => selectedBodies.has(m.body))
+            : smsMessages.filter((_, i) => selectedIndices.has(i))
+          ).map((m) => m.hash);
+          await markAsProcessed(hashes);
           setStep('done');
           // Check monthly limit
           try {
