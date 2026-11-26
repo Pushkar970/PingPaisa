@@ -86,11 +86,12 @@ export class AiService {
 
     // Build context and call LLM
     const financialContext = await this.buildFinancialContext(userId);
-    const history = await this.prisma.message.findMany({
+    const recentHistory = await this.prisma.message.findMany({
       where: { conversationId: convId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       take: 20,
     });
+    const history = recentHistory.reverse();
 
     const messages = [
       {

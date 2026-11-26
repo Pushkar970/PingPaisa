@@ -78,13 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await AsyncStorage.removeItem(TOKEN_KEY);
-    // Also clear secure store biometric token
-    if (Platform.OS !== 'web') {
-      try {
-        const SecureStore = require('expo-secure-store');
-        await SecureStore.deleteItemAsync('biometric_token');
-      } catch {}
-    }
+    // Keep biometric_token in SecureStore so Biometric Login continues working after logout.
     setUser(null);
   }, []);
 

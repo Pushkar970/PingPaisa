@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
@@ -6,7 +7,10 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {}
 
   /** Get total expenses for the current calendar month */
   private async getMonthlySpent(userId: string): Promise<number> {
@@ -63,6 +67,14 @@ export class UserService {
   }
 
   async upgrade(userId: string) {
+    // Prevent unverified free self-upgrades unless explicitly enabled for dev/demo environments
+    const allowFreeUpgrade = this.configService.get<string>('ALLOW_FREE_UPGRADE') === 'true';
+    if (!allowFreeUpgrade) {
+      throw new ForbiddenException('Verified payment is required to upgrade to Pro.');
+    }
+    const existing = await this.prisma.userPlan.findUnique({ where: { userId } });
+    if (!existing) throw new NotFoundException('Plan not found');
+
     await this.prisma.userPlan.update({
       where: { userId },
       data: { tier: 'PRO' },

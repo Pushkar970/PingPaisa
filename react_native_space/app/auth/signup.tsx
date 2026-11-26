@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
@@ -11,6 +11,7 @@ import { colors, spacing, borderRadius } from '@/src/theme';
 import { getErrorMessage } from '@/src/api/customFetch';
 
 export default function SignupScreen() {
+  const router = useRouter();
   const { signup, setTokenAndLoad } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -38,6 +39,7 @@ export default function SignupScreen() {
     setError('');
     try {
       await signup(email.trim(), password, name.trim());
+      router.replace('/tabs/home');
     } catch (e) {
       setError(getErrorMessage(e, 'Sign up failed'));
     } finally {
@@ -85,6 +87,7 @@ export default function SignupScreen() {
             setError(err);
           } else if (token) {
             await setTokenAndLoad(token);
+            router.replace('/tabs/home');
           }
         }
       }

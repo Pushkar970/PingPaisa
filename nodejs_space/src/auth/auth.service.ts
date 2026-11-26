@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
@@ -69,12 +69,46 @@ export class AuthService {
     return this.jwtService.sign({ sub: userId, email });
   }
 
+  private validateRedirectUri(rawUri: string): string {
+    const appOrigin = (this.configService.get<string>('APP_ORIGIN') ?? 'http://localhost:3000').replace(/\/$/, '');
+    if (!rawUri) return `${appOrigin}/auth/callback`;
+
+    let parsed: URL;
+    try {
+      parsed = new URL(rawUri);
+    } catch {
+      throw new BadRequestException('Invalid redirect_uri');
+    }
+
+    const allowedSchemes = (this.configService.get<string>('OAUTH_ALLOWED_SCHEMES') ?? 'abacusai1789728164,exp')
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    const scheme = parsed.protocol.replace(/:$/, '').toLowerCase();
+    if (allowedSchemes.includes(scheme)) {
+      return parsed.toString();
+    }
+
+    const extraOrigins = (this.configService.get<string>('OAUTH_ALLOWED_ORIGINS') ?? '')
+      .split(',')
+      .map((o) => o.trim().replace(/\/$/, ''))
+      .filter(Boolean);
+    const allowedOrigins = new Set([appOrigin, ...extraOrigins]);
+    const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+    if (allowedOrigins.has(parsed.origin) || (isLocalhost && (scheme === 'http' || scheme === 'https'))) {
+      return parsed.toString();
+    }
+
+    throw new BadRequestException('Untrusted redirect_uri');
+  }
+
   getGoogleAuthUrl(redirectUri: string): string {
+    const safeRedirectUri = this.validateRedirectUri(redirectUri);
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID') ?? 'PLACEHOLDER_CLIENT_ID';
     const appOrigin = (this.configService.get<string>('APP_ORIGIN') ?? 'http://localhost:3000').replace(/\/$/, '');
     const callbackUrl = `${appOrigin}/api/auth/google/callback`;
     const secret = this.configService.getOrThrow<string>('JWT_SECRET');
-    const statePayload = JSON.stringify({ redirectUri, ts: Date.now() });
+    const statePayload = JSON.stringify({ redirectUri: safeRedirectUri, ts: Date.now() });
     const hmac = crypto.createHmac('sha256', secret).update(statePayload).digest('hex');
     const state = Buffer.from(JSON.stringify({ payload: statePayload, sig: hmac })).toString('base64url');
 
@@ -96,9 +130,16 @@ export class AuthService {
     try {
       const stateObj = JSON.parse(Buffer.from(stateStr, 'base64url').toString());
       const expectedHmac = crypto.createHmac('sha256', secret).update(stateObj.payload).digest('hex');
-      if (expectedHmac !== stateObj.sig) throw new Error('Invalid state signature');
+      const sigBuf = Buffer.from(String(stateObj.sig ?? ''), 'hex');
+      const expectedBuf = Buffer.from(expectedHmac, 'hex');
+      if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+        throw new Error('Invalid state signature');
+      }
       const payload = JSON.parse(stateObj.payload);
-      redirectUri = payload.redirectUri;
+      if (!payload.ts || Date.now() - Number(payload.ts) > 10 * 60 * 1000) {
+        throw new Error('Expired state');
+      }
+      redirectUri = this.validateRedirectUri(payload.redirectUri);
     } catch {
       throw new UnauthorizedException('Invalid state parameter');
     }
@@ -119,21 +160,26 @@ export class AuthService {
         grant_type: 'authorization_code',
       }),
     });
+    if (!tokenRes.ok) throw new UnauthorizedException('Failed to exchange Google code');
     const tokenData = await tokenRes.json();
     if (!tokenData.id_token) throw new UnauthorizedException('Failed to get Google token');
 
     const userInfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
+    if (!userInfoRes.ok) throw new UnauthorizedException('Failed to fetch Google user info');
     const userInfo = await userInfoRes.json();
-    if (!userInfo.email) throw new UnauthorizedException('No email from Google');
+    if (!userInfo.email || userInfo.email_verified !== true) {
+      throw new UnauthorizedException('Verified email required from Google');
+    }
 
-    let user = await this.prisma.user.findUnique({ where: { email: userInfo.email } });
+    const normalizedEmail = String(userInfo.email).toLowerCase().trim();
+    let user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
       user = await this.prisma.user.create({
         data: {
-          email: userInfo.email,
-          name: userInfo.name ?? userInfo.email.split('@')[0],
+          email: normalizedEmail,
+          name: userInfo.name ?? normalizedEmail.split('@')[0],
           googleId: userInfo.sub,
           plan: { create: { tier: 'FREE', aiQueriesUsed: 0, subscriptionCount: 0 } },
         },

@@ -28,6 +28,7 @@ export default function LoginScreen() {
     setError('');
     try {
       await login(email.trim(), password);
+      router.replace('/tabs/home');
     } catch (e) {
       setError(getErrorMessage(e, 'Login failed'));
     } finally {
@@ -77,6 +78,7 @@ export default function LoginScreen() {
             setError(err);
           } else if (token) {
             await setTokenAndLoad(token);
+            router.replace('/tabs/home');
           }
         }
       }
@@ -100,6 +102,7 @@ export default function LoginScreen() {
       const result = await LocalAuth.authenticateAsync({ promptMessage: 'Authenticate to log in' });
       if (result.success) {
         await setTokenAndLoad(storedToken);
+        router.replace('/tabs/home');
       }
     } catch {
       setError('Biometric authentication failed');
@@ -144,7 +147,7 @@ export default function LoginScreen() {
         </Pressable>
       </View>
 
-      <GradientButton title="Sign Up" onPress={() => router.push('/auth/signup')} />
+      <GradientButton title="Log In" onPress={handleLogin} loading={loading} />
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
@@ -167,9 +170,9 @@ export default function LoginScreen() {
       )}
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Already have an account? </Text>
-        <Pressable onPress={handleLogin} disabled={loading}>
-          <Text style={styles.footerLink}>{loading ? 'Logging in...' : 'Log In'}</Text>
+        <Text style={styles.footerText}>Don't have an account? </Text>
+        <Pressable onPress={() => router.push('/auth/signup')}>
+          <Text style={styles.footerLink}>Sign Up</Text>
         </Pressable>
       </View>
     </ScrollView>
