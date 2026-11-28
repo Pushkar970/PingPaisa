@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { callLlmCompletion } from '../common/llm.util';
 
 function toIncomeResponse(e: any) {
   return {
@@ -139,23 +140,10 @@ SMS messages to parse:
 ${messages.map((m, i) => `[${i + 1}] ${m}`).join('\n')}`;
 
     try {
-      const apiKey = this.configService.get<string>('ABACUSAI_API_KEY');
-      const res = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: prompt }],
-          response_format: { type: 'json_object' },
-          stream: false,
-        }),
-        signal: AbortSignal.timeout(25000),
+      const content = await callLlmCompletion(this.configService, {
+        messages: [{ role: 'user', content: prompt }],
+        jsonMode: true,
       });
-      if (!res.ok) {
-        this.logger.error(`Credit SMS parse LLM HTTP ${res.status}`);
-        return { parsed: [], total: messages.length, failed: messages.length };
-      }
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content;
       if (!content) {
         return { parsed: [], total: messages.length, failed: messages.length };
       }

@@ -2,6 +2,7 @@ import { Injectable, ForbiddenException, NotFoundException, Logger } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { callLlmCompletion } from '../common/llm.util';
 
 function toNum(v: any): number {
   if (v instanceof Decimal) return Number(v);
@@ -103,19 +104,8 @@ export class AiService {
 
     let aiContent = 'I apologize, but I\'m unable to process your request right now. Please try again later.';
     try {
-      const apiKey = this.configService.get<string>('ABACUSAI_API_KEY');
-      const res = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ messages, stream: false }),
-        signal: AbortSignal.timeout(25000),
-      });
-      if (!res.ok) {
-        this.logger.error(`LLM API HTTP ${res.status}`);
-      } else {
-        const data = await res.json();
-        aiContent = data?.choices?.[0]?.message?.content ?? aiContent;
-      }
+      const content = await callLlmCompletion(this.configService, { messages });
+      if (content) aiContent = content;
     } catch (error: any) {
       this.logger.error('LLM API error', error?.message);
     }
@@ -210,18 +200,10 @@ export class AiService {
     ];
 
     try {
-      const apiKey = this.configService.get<string>('ABACUSAI_API_KEY');
-      const res = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: prompt }],
-          response_format: { type: 'json_object' },
-          stream: false,
-        }),
+      const content = await callLlmCompletion(this.configService, {
+        messages: [{ role: 'user', content: prompt }],
+        jsonMode: true,
       });
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content;
       if (content) {
         const parsed = JSON.parse(content);
         const arr = Array.isArray(parsed) ? parsed : parsed?.suggestions ?? parsed?.items ?? parsed?.insights ?? [];
