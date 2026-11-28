@@ -22,14 +22,14 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Expense Tracker API')
-    .setDescription('API for subscription & expense tracking with AI assistant')
+    .setTitle('PingPaisa API')
+    .setDescription('API for PingPaisa subscription, income & expense tracking with AI assistant')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(swaggerPath, app, document, {
-    customSiteTitle: 'Expense Tracker API',
+    customSiteTitle: 'PingPaisa API',
     customCss: `
       .swagger-ui .topbar { display: none; }
       body { background: #fafafa; }
